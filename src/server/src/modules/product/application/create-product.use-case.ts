@@ -1,5 +1,5 @@
 import { Product } from '../domain/product.entity.js'
-import type { ProductRepository } from './../domain/product.repository.js'
+import type { ProductRepository } from '../domain/product.repository.js'
 import type { ProductRequestDTO } from './product-request.dto.js'
 
 export class CreateProductUseCase {

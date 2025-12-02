@@ -28,5 +28,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/server/**/*"]
+  "include": ["src/server/**/*"],
+  "exclude": ["node_modules"]
 }
