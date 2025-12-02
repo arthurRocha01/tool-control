@@ -9,6 +9,8 @@ export interface ProductProps {
   brand: string
   model: string
   price: number
+  quantity: number
+  minimum_quantity: number
   description: DescriptionProduct
 }
 
@@ -19,6 +21,8 @@ export class Product {
   private model!: string
   private price!: number
   private description!: DescriptionProduct
+  private quantity!: number
+  private minimum_quantity!: number
   private created_at?: Date
   private updated_at?: Date
 
@@ -55,11 +59,28 @@ export class Product {
       brand: this.brand,
       model: this.model,
       price: this.price,
+      quantity: this.quantity,
+      minimum_quantity: this.minimum_quantity,
       description: this.description,
     }
   }
 
   public getId() {
     return this.id
+  }
+
+  public toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      brand: this.brand,
+      model: this.model,
+      price: this.price,
+      quantity: this.quantity,
+      minimum_quantity: this.minimum_quantity,
+      description: this.description,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
+    }
   }
 }

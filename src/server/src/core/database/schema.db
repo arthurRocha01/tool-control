@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS inventory_db;
-USE inventory_db;
+CREATE DATABASE IF NOT EXISTS toolcontrol;
+USE toolcontrol;
 
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,

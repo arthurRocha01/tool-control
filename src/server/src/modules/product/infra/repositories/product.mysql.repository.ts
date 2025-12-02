@@ -8,6 +8,8 @@ interface ProdutoRow extends RowDataPacket {
   brand: string
   model: string
   price: number
+  quantity: number
+  minimum_quantity: number
   material_type: string
   size: string
   voltage: string
@@ -20,6 +22,8 @@ export class ProductMysqlRepository implements ProductRepository {
       brand: row.brand,
       model: row.model,
       price: row.price,
+      quantity: row.quantity,
+      minimum_quantity: row.minimum_quantity,
       description: {
         material_type: row.material_type,
         size: row.size,
@@ -44,12 +48,23 @@ export class ProductMysqlRepository implements ProductRepository {
   }
 
   async save(product: Product): Promise<Product> {
-    const { name, brand, model, price, description } = product.getProps()
+    const { name, brand, model, price, quantity, minimum_quantity, description } =
+      product.getProps()
 
     const [result] = await pool.query<OkPacket>(
-      `INSERT INTO products (name, brand, model, price, material_type, size, voltage)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, brand, model, price, description.material_type, description.size, description.voltage],
+      `INSERT INTO products (name, brand, model, price, quantity, minimum_quantity, material_type, size, voltage)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        brand,
+        model,
+        price,
+        quantity,
+        minimum_quantity,
+        description.material_type,
+        description.size,
+        description.voltage,
+      ],
     )
 
     product._setMetaData(result.insertId.toString(), new Date(), new Date())
@@ -57,17 +72,20 @@ export class ProductMysqlRepository implements ProductRepository {
   }
 
   async edit(product: Product): Promise<Product> {
-    const { name, brand, model, price, description } = product.getProps()
+    const { name, brand, model, price, quantity, minimum_quantity, description } =
+      product.getProps()
 
     await pool.query(
       `UPDATE products 
-      SET name = ?, brand = ?, model = ?, price = ?, material_type = ?, size = ?, voltage = ?, updated_at = CURRENT_TIMESTAMP
+      SET name = ?, brand = ?, model = ?, price = ?, quantity = ?, minimum_quantity = ?, material_type = ?, size = ?, voltage = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?`,
       [
         name,
         brand,
         model,
         price,
+        quantity,
+        minimum_quantity,
         description.material_type,
         description.size,
         description.voltage,

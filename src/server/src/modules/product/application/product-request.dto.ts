@@ -3,11 +3,11 @@ export interface ProductRequestDTO {
   brand: string
   model: string
   price: number
+  quantity: number
+  minimum_quantity: number
   description: {
     material_type: string
     size: string
     voltage: string
   }
-  quantity: number
-  minimum_quantity: number
 }

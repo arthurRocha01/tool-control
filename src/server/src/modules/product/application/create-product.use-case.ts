@@ -11,6 +11,8 @@ export class CreateProductUseCase {
       brand: data.brand,
       model: data.model,
       price: data.price,
+      quantity: data.quantity,
+      minimum_quantity: data.minimum_quantity,
       description: {
         material_type: data.description.material_type,
         size: data.description.size,
