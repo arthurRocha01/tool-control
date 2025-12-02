@@ -4,27 +4,60 @@ import type { ProductFormData } from '../types'
 
 const AddProduct = () => {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     brand: '',
     model: '',
+    price: 0,
     quantity: 0,
-    minQuantity: 0,
-    characteristics: {
-      material: '',
+    minimum_quantity: 0,
+    description: {
+      material_type: '',
       size: '',
-      weight: '',
       voltage: '',
     },
-    photo: '',
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Simulação de salvamento
-    console.log('Produto cadastrado:', formData)
-    alert('Produto cadastrado com sucesso!')
-    navigate('/products')
+    setLoading(true)
+    setError('')
+
+    try {
+      const payload = {
+        name: formData.name,
+        brand: formData.brand,
+        model: formData.model,
+        price: formData.price,
+        quantity: formData.quantity,
+        minimum_quantity: formData.minimum_quantity,
+        description: {
+          material_type: formData.description.material_type,
+          size: formData.description.size,
+          voltage: formData.description.voltage,
+        },
+      }
+
+      const response = await fetch('http://localhost:5000/produtos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao cadastrar o produto')
+      }
+
+      alert('Produto cadastrado com sucesso!')
+      navigate('/products')
+    } catch (err) {
+      setError(`Erro ao cadastrar o produto. Tente novamente: ${err}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleInputChange = <K extends keyof ProductFormData>(
@@ -37,8 +70,8 @@ const AddProduct = () => {
   const handleCharacteristicChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      characteristics: {
-        ...prev.characteristics,
+      description: {
+        ...prev.description,
         [field]: value,
       },
     }))
@@ -52,6 +85,8 @@ const AddProduct = () => {
       </div>
 
       <div className='bg-white rounded-xl p-8 border border-gray-200 max-w-4xl'>
+        {error && <div className='mb-4 p-3 bg-red-100 text-red-700 rounded'>{error}</div>}
+
         <form onSubmit={handleSubmit} className='space-y-6'>
           {/* Informações Básicas */}
           <div>
@@ -97,19 +132,6 @@ const AddProduct = () => {
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Foto do Produto (URL)
-                </label>
-                <input
-                  type='url'
-                  value={formData.photo}
-                  onChange={(e) => handleInputChange('photo', e.target.value)}
-                  placeholder='https://exemplo.com/imagem.jpg'
-                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                />
-              </div>
             </div>
           </div>
 
@@ -143,8 +165,10 @@ const AddProduct = () => {
                   type='number'
                   required
                   min='0'
-                  value={formData.minQuantity}
-                  onChange={(e) => handleInputChange('minQuantity', parseInt(e.target.value) || 0)}
+                  value={formData.minimum_quantity}
+                  onChange={(e) =>
+                    handleInputChange('minimum_quantity', parseInt(e.target.value) || 0)
+                  }
                   placeholder='0'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
@@ -164,11 +188,11 @@ const AddProduct = () => {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Material do Cabo
+                  Tipo do Material
                 </label>
                 <input
                   type='text'
-                  value={formData.characteristics.material}
+                  value={formData.description.material}
                   onChange={(e) => handleCharacteristicChange('material', e.target.value)}
                   placeholder='Ex: Aço Carbono'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -179,20 +203,9 @@ const AddProduct = () => {
                 <label className='block text-sm font-medium text-gray-700 mb-2'>Tamanho</label>
                 <input
                   type='text'
-                  value={formData.characteristics.size}
+                  value={formData.description.size}
                   onChange={(e) => handleCharacteristicChange('size', e.target.value)}
                   placeholder='Ex: 15cm'
-                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>Peso</label>
-                <input
-                  type='text'
-                  value={formData.characteristics.weight}
-                  onChange={(e) => handleCharacteristicChange('weight', e.target.value)}
-                  placeholder='Ex: 1.5kg'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
@@ -203,7 +216,7 @@ const AddProduct = () => {
                 </label>
                 <input
                   type='text'
-                  value={formData.characteristics.voltage}
+                  value={formData.description.voltage}
                   onChange={(e) => handleCharacteristicChange('voltage', e.target.value)}
                   placeholder='Ex: 110V'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -216,10 +229,11 @@ const AddProduct = () => {
           <div className='flex gap-4 pt-6 border-t border-gray-200'>
             <button
               type='submit'
+              disabled={loading}
               className='flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium'
             >
               <i className='hgi-stroke hgi-checkmark-circle-01'></i>
-              Salvar Produto
+              {loading ? 'Salvando...' : 'Salvar Produto'}
             </button>
             <button
               type='button'

@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
 import AddProduct from './pages/AddProduct'
 import Settings from './pages/Settings'
+import ProductEdit from './pages/EditProduct'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path='products' element={<Products />} />
           <Route path='add-product' element={<AddProduct />} />
+          <Route path='edit-product/:id' element={<ProductEdit />} />
           <Route path='settings' element={<Settings />} />
         </Route>
       </Routes>

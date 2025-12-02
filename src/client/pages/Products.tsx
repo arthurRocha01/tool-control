@@ -1,216 +1,198 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { mockProducts } from '../store/mockData'
-import type { Product } from '../types'
+import { useEffect, useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { StockStatus } from '../types'
+
+type Product = {
+  id: string
+  name: string
+  brand: string
+  model: string
+  quantity: number
+  minimum_quantity: number
+  description?: {
+    material_type?: string
+    voltage?: string
+  }
+}
 
 const Products = () => {
+  const [products, setProducts] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [brandFilter, setBrandFilter] = useState('')
-  const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'ok'>('all')
+  const [stockFilter, setStockFilter] = useState<StockStatus>('all')
+  const [loading, setLoading] = useState(true)
 
-  // Filtrar produtos
+  const navigate = useNavigate()
+
+  // ---- Handlers ----
+
+  const handleAddProduct = () => {
+    navigate('/add-product')
+  }
+
+  const handleEdit = (id: string) => {
+    navigate(`/edit-product/${id}`)
+  }
+
+  const handleDelete = async (id: string) => {
+    const confirmed = confirm('Tem certeza que deseja excluir este produto?')
+    if (!confirmed) return
+
+    try {
+      await fetch(`http://localhost:5000/produtos/${id}`, {
+        method: 'DELETE',
+      })
+
+      setProducts((prev) => prev.filter((p) => p.id !== id))
+    } catch (err) {
+      console.error('Erro ao excluir produto:', err)
+      alert('Erro ao excluir produto.')
+    }
+  }
+
+  // ---- Carregar produtos ----
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/produtos')
+        const data = await response.json()
+        setProducts(data)
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
+
+  // ---- Filtros ----
+
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter((product) => {
+    return products.filter((product) => {
       const matchesSearch =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.model.toLowerCase().includes(searchTerm.toLowerCase())
+        product.brand.toLowerCase().includes(searchTerm.toLowerCase())
 
-      const matchesBrand = !brandFilter || product.brand === brandFilter
+      const matchesBrand =
+        brandFilter === '' || product.brand.toLowerCase().includes(brandFilter.toLowerCase())
 
       const matchesStock =
         stockFilter === 'all' ||
-        (stockFilter === 'low' && product.quantity <= product.minQuantity) ||
-        (stockFilter === 'ok' && product.quantity > product.minQuantity)
+        (stockFilter === 'low' && product.quantity <= product.minimum_quantity) ||
+        (stockFilter === 'ok' && product.quantity > product.minimum_quantity)
 
       return matchesSearch && matchesBrand && matchesStock
     })
-  }, [searchTerm, brandFilter, stockFilter])
+  }, [products, searchTerm, brandFilter, stockFilter])
 
-  // Lista de marcas únicas
-  const brands = useMemo(() => {
-    return [...new Set(mockProducts.map((p) => p.brand))].sort()
-  }, [])
-
-  const getStockStatus = (product: Product) => {
-    if (product.quantity === 0) return { label: 'Sem estoque', color: 'red' }
-    if (product.quantity <= product.minQuantity) return { label: 'Estoque baixo', color: 'orange' }
-    return { label: 'OK', color: 'green' }
+  const getStockStatus = (quantity: number, minimum: number) => {
+    return quantity <= minimum ? 'Baixo' : 'OK'
   }
 
+  // ---- Tela de loading ----
+
+  if (loading) {
+    return <div className='p-8 text-center text-gray-500'>Carregando produtos...</div>
+  }
+
+  // ---- Render principal ----
+
   return (
-    <div className='p-8'>
-      <div className='mb-8 flex items-center justify-between'>
-        <div>
-          <h1 className='text-3xl font-bold text-gray-900 mb-2'>Listagem de Produtos</h1>
-          <p className='text-gray-600'>{filteredProducts.length} produtos encontrados</p>
-        </div>
-        <Link
-          to='/add-product'
-          className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+    <div className='p-6'>
+      <div className='flex justify-between items-center mb-6'>
+        <h1 className='text-2xl font-semibold'>Produtos</h1>
+        <button
+          onClick={handleAddProduct}
+          className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition'
         >
-          <i className='hgi-stroke hgi-add-circle'></i>
-          <span>Adicionar Produto</span>
-        </Link>
+          + Adicionar Produto
+        </button>
       </div>
 
       {/* Filtros */}
-      <div className='bg-white rounded-xl p-6 border border-gray-200 mb-6'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          {/* Busca */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              <i className='hgi-stroke hgi-search-01'></i> Buscar
-            </label>
-            <input
-              type='text'
-              placeholder='Nome, marca ou modelo...'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-            />
-          </div>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
+        <input
+          type='text'
+          placeholder='Pesquisar...'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className='border px-3 py-2 rounded-lg'
+        />
 
-          {/* Filtro por marca */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              <i className='hgi-stroke hgi-filter'></i> Marca
-            </label>
-            <select
-              value={brandFilter}
-              onChange={(e) => setBrandFilter(e.target.value)}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-            >
-              <option value=''>Todas as marcas</option>
-              {brands.map((brand) => (
-                <option key={brand} value={brand}>
-                  {brand}
-                </option>
-              ))}
-            </select>
-          </div>
+        <input
+          type='text'
+          placeholder='Marca...'
+          value={brandFilter}
+          onChange={(e) => setBrandFilter(e.target.value)}
+          className='border px-3 py-2 rounded-lg'
+        />
 
-          {/* Filtro por estoque */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              <i className='hgi-stroke hgi-package'></i> Status Estoque
-            </label>
-            <select
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value as 'all' | 'low' | 'ok')}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-            >
-              <option value='all'>Todos</option>
-              <option value='low'>Estoque baixo</option>
-              <option value='ok'>Estoque OK</option>
-            </select>
-          </div>
-        </div>
+        <select
+          value={stockFilter}
+          onChange={(e) => setStockFilter(e.target.value as StockStatus)}
+          className='border px-3 py-2 rounded-lg'
+        >
+          <option value='all'>Todos</option>
+          <option value='low'>Estoque Baixo</option>
+          <option value='ok'>Estoque OK</option>
+        </select>
       </div>
 
       {/* Tabela */}
-      <div className='bg-white rounded-xl border border-gray-200 overflow-hidden'>
-        <div className='overflow-x-auto'>
-          <table className='w-full'>
-            <thead className='bg-gray-50 border-b border-gray-200'>
-              <tr>
-                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider'>
-                  Produto
-                </th>
-                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider'>
-                  Marca / Modelo
-                </th>
-                <th className='px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider'>
-                  Quantidade
-                </th>
-                <th className='px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider'>
-                  Estoque Mínimo
-                </th>
-                <th className='px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider'>
-                  Status
-                </th>
-                <th className='px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider'>
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-gray-200'>
-              {filteredProducts.map((product) => {
-                const status = getStockStatus(product)
-                return (
-                  <tr
-                    key={product.id}
-                    className={`hover:bg-gray-50 transition-colors ${
-                      product.quantity <= product.minQuantity ? 'bg-orange-50' : ''
-                    }`}
-                  >
-                    <td className='px-6 py-4'>
-                      <div className='font-medium text-gray-900'>{product.name}</div>
-                      <div className='text-sm text-gray-500'>
-                        {product.characteristics.material || product.characteristics.voltage || '-'}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4'>
-                      <div className='text-gray-900'>{product.brand}</div>
-                      <div className='text-sm text-gray-500'>{product.model}</div>
-                    </td>
-                    <td className='px-6 py-4 text-center'>
-                      <span className='text-lg font-semibold text-gray-900'>
-                        {product.quantity}
-                      </span>
-                    </td>
-                    <td className='px-6 py-4 text-center text-gray-600'>{product.minQuantity}</td>
-                    <td className='px-6 py-4 text-center'>
-                      <span
-                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                          status.color === 'red'
-                            ? 'bg-red-100 text-red-800'
-                            : status.color === 'orange'
-                              ? 'bg-orange-100 text-orange-800'
-                              : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        <i
-                          className={`hgi-stroke ${
-                            status.color === 'red'
-                              ? 'hgi-alert-circle'
-                              : status.color === 'orange'
-                                ? 'hgi-alert-circle'
-                                : 'hgi-checkmark-circle-01'
-                          }`}
-                        ></i>
-                        {status.label}
-                      </span>
-                    </td>
-                    <td className='px-6 py-4'>
-                      <div className='flex items-center justify-center gap-2'>
-                        <button
-                          className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
-                          title='Editar'
-                        >
-                          <i className='hgi-stroke hgi-edit-02'></i>
-                        </button>
-                        <button
-                          className='p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
-                          title='Excluir'
-                        >
-                          <i className='hgi-stroke hgi-delete-02'></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+      <div className='overflow-x-auto border rounded-lg'>
+        <table className='w-full'>
+          <thead className='bg-gray-100 text-left'>
+            <tr>
+              <th className='p-3'>Nome</th>
+              <th className='p-3'>Marca</th>
+              <th className='p-3'>Modelo</th>
+              <th className='p-3'>Estoque</th>
+              <th className='p-3'>Status</th>
+              <th className='p-3'>Descrição</th>
+              <th className='p-3'>Ações</th>
+            </tr>
+          </thead>
 
-        {filteredProducts.length === 0 && (
-          <div className='text-center py-12 text-gray-500'>
-            <i className='hgi-stroke hgi-package text-4xl mb-2'></i>
-            <p>Nenhum produto encontrado</p>
-          </div>
-        )}
+          <tbody>
+            {filteredProducts.map((product) => (
+              <tr key={product.id} className='border-t'>
+                <td className='p-3'>{product.name}</td>
+                <td className='p-3'>{product.brand}</td>
+                <td className='p-3'>{product.model}</td>
+                <td className='p-3'>
+                  {product.quantity}/{product.minimum_quantity}
+                </td>
+                <td className='p-3'>
+                  {getStockStatus(product.quantity, product.minimum_quantity)}
+                </td>
+                <td className='p-3'>
+                  {product.description?.material_type || product.description?.voltage || '-'}
+                </td>
+
+                <td className='p-3 flex gap-2'>
+                  <button
+                    onClick={() => handleEdit(product.id)}
+                    className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg'
+                    title='Editar'
+                  >
+                    <i className='hgi-stroke hgi-edit-02'></i>
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className='p-2 text-red-600 hover:bg-red-50 rounded-lg'
+                    title='Excluir'
+                  >
+                    <i className='hgi-stroke hgi-delete-02'></i>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
