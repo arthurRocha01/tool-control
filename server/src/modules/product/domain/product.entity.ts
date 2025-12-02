@@ -14,41 +14,39 @@ export interface ProductProps {
 
 export class Product {
   private id?: string
-  private nome: string
-  private marca: string
-  private modelo: string
-  private preco: number
-  private caracteristicas: Caracteristicas
+  private nome!: string
+  private marca!: string
+  private modelo!: string
+  private preco!: number
+  private caracteristicas!: Caracteristicas
   private data_criacao?: Date
   private data_ultima_atualizacao?: Date
 
   private constructor(props: ProductProps) {
-    this.nome = props.nome
-    this.marca = props.marca
-    this.modelo = props.modelo
-    this.preco = props.preco
-    this.caracteristicas = props.caracteristicas
+    Object.assign(this, props)
   }
 
   public static create(props: ProductProps): Product {
-    const product = new Product(props)
-    return product
+    return new Product(props)
   }
 
-  public edit(data: ProductProps): Product {
-    this.nome = data.nome
-    this.marca = data.marca
-    this.modelo = data.modelo
-    this.preco = data.preco
-    this.caracteristicas = data.caracteristicas
+  public edit(props: Partial<ProductProps>): Product {
+    Object.assign(this, props)
+    if (props.caracteristicas) {
+      this.caracteristicas = { ...this.caracteristicas, ...props.caracteristicas }
+    }
     this.data_ultima_atualizacao = new Date()
     return this
   }
 
-  public adddMetaData(id: string, data_criacao: Date, data_ultima_atualizacao: Date) {
+  public _setMetaData(id: string, data_criacao: Date, data_ultima_atualizacao: Date) {
     this.id = id
     this.data_criacao = data_criacao
     this.data_ultima_atualizacao = data_ultima_atualizacao
+  }
+
+  public updatedLastModified() {
+    this.data_ultima_atualizacao = new Date()
   }
 
   public getProps(): ProductProps {
@@ -59,5 +57,9 @@ export class Product {
       preco: this.preco,
       caracteristicas: this.caracteristicas,
     }
+  }
+
+  public getId() {
+    return this.id
   }
 }

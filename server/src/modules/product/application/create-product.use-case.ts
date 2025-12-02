@@ -1,25 +1,23 @@
 import { Product } from '../domain/product.entity.js'
 import type { ProductRepository } from './../domain/product.repository.js'
-import type { CreateProductInputDTO } from './create-product.dto.js'
+import type { ProductRequestDTO } from './product-request.dto.js'
 
 export class CreateProductUseCase {
   constructor(private productRepo: ProductRepository) {}
 
-  async execute(input: CreateProductInputDTO): Promise<Product> {
+  async execute(data: ProductRequestDTO): Promise<Product> {
     const product = Product.create({
-      nome: input.nome,
-      marca: input.marca,
-      modelo: input.modelo,
-      preco: input.preco,
+      nome: data.nome,
+      marca: data.marca,
+      modelo: data.modelo,
+      preco: data.preco,
       caracteristicas: {
-        tipo_material: input.caracteristicas.tipo_material,
-        tamanho: input.caracteristicas.tamanho,
-        tensao: input.caracteristicas.tensao,
+        tipo_material: data.caracteristicas.tipo_material,
+        tamanho: data.caracteristicas.tamanho,
+        tensao: data.caracteristicas.tensao,
       },
     })
 
-    const productSaved = await this.productRepo.save(product)
-
-    return productSaved
+    return await this.productRepo.save(product)
   }
 }

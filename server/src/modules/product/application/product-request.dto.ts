@@ -1,4 +1,4 @@
-export interface CreateProductInputDTO {
+export interface ProductRequestDTO {
   nome: string
   marca: string
   modelo: string

@@ -4,7 +4,6 @@ import { pool } from '../../../../core/database/connection.js'
 import type { OkPacket, RowDataPacket } from 'mysql2'
 
 interface ProdutoRow extends RowDataPacket {
-  id: number
   nome: string
   marca: string
   modelo: string
@@ -12,45 +11,34 @@ interface ProdutoRow extends RowDataPacket {
   tipo_material: string
   tamanho: string
   tensao: string
-  data_criacao: Date
-  data_ultima_atualizacao: Date
 }
 
 export class ProductMysqlRepository implements ProductRepository {
   private mapRowToProduct(row: ProdutoRow): Product {
-    const {
-      id,
-      nome,
-      marca,
-      modelo,
-      preco,
-      tipo_material,
-      tamanho,
-      tensao,
-      data_criacao,
-      data_ultima_atualizacao,
-    } = row
-
     const product = Product.create({
-      nome,
-      marca,
-      modelo,
-      preco,
-      caracteristicas: { tipo_material, tamanho, tensao },
+      nome: row.nome,
+      marca: row.marca,
+      modelo: row.modelo,
+      preco: row.preco,
+      caracteristicas: {
+        tipo_material: row.tipo_material,
+        tamanho: row.tamanho,
+        tensao: row.tensao,
+      },
     })
 
-    product.adddMetaData(id.toString(), data_criacao, data_ultima_atualizacao)
+    product._setMetaData(row.id, row.data_criacao, row.data_ultima_atualizacao)
     return product
   }
 
-  async findAll(): Promise<Product[]> {
+  async findAll(): Promise<Product[] | null> {
     const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM produtos`)
+    if (rows.length == 0) return null
     return rows.map(this.mapRowToProduct)
   }
 
   async findById(id: string): Promise<Product | null> {
     const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM produtos WHERE id = ?`, [id])
-
     if (!rows[0]) return null
     return this.mapRowToProduct(rows[0])
   }
@@ -72,7 +60,7 @@ export class ProductMysqlRepository implements ProductRepository {
       ],
     )
 
-    product.adddMetaData(result.insertId.toString(), new Date(), new Date())
+    product._setMetaData(result.insertId.toString(), new Date(), new Date())
     return product
   }
 
@@ -81,8 +69,8 @@ export class ProductMysqlRepository implements ProductRepository {
 
     await pool.query(
       `UPDATE produtos 
-     SET nome = ?, marca = ?, modelo = ?, preco = ?, tipo_material = ?, tamanho = ?, tensao = ?, data_ultima_atualizacao = CURRENT_TIMESTAMP
-     WHERE id = ?`,
+      SET nome = ?, marca = ?, modelo = ?, preco = ?, tipo_material = ?, tamanho = ?, tensao = ?, data_ultima_atualizacao = CURRENT_TIMESTAMP
+      WHERE id = ?`,
       [
         nome,
         marca,
@@ -91,12 +79,11 @@ export class ProductMysqlRepository implements ProductRepository {
         caracteristicas.tipo_material,
         caracteristicas.tamanho,
         caracteristicas.tensao,
-        product['id'],
+        product.getId(),
       ],
     )
 
-    product['data_ultima_atualizacao'] = new Date()
-
+    product.updatedLastModified()
     return product
   }
 

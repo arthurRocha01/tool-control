@@ -5,9 +5,6 @@ export class FindByIdProductUseCase {
   constructor(private productRepo: ProductRepository) {}
 
   async execute(input: string): Promise<Product | null> {
-    const result = await this.productRepo.findById(input)
-
-    if (!result) return null
-    return result
+    return await this.productRepo.findById(input)
   }
 }
