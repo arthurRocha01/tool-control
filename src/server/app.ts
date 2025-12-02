@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 import productRoutes from './modules/product/infra/http/product.routes.js'
+import authRoutes from './modules/auth/infra/http/auth.routes.js'
 
 const app: Application = express()
 app.use(express.json())
@@ -16,6 +17,7 @@ app.use(cors({ origin: 'http://localhost:5173' }))
 
 // Rotas
 app.use('/produtos', productRoutes)
+app.use('/auth', authRoutes)
 
 // Servir React
 const frontendPath = path.join(__dirname, '../../dist')
