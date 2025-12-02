@@ -11,6 +11,8 @@ export interface Product {
     size: string
     voltage: string
   }
+  updated_at?: string
+  created_at?: string
 }
 
 export type StockStatus = 'all' | 'low' | 'ok'

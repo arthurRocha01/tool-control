@@ -19,6 +19,8 @@ const AddProduct = () => {
       size: '',
       voltage: '',
     },
+    updated_at: Date.prototype,
+    created_at: Date.prototype,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,7 +194,7 @@ const AddProduct = () => {
                 </label>
                 <input
                   type='text'
-                  value={formData.description.material}
+                  value={formData.description.material_type}
                   onChange={(e) => handleCharacteristicChange('material', e.target.value)}
                   placeholder='Ex: Aço Carbono'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'

@@ -1,39 +1,87 @@
-import { useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import IndicatorCard from '../components/IndicatorCard'
 import AlertsList from '../components/AlertsList'
 import QuickActions from '../components/QuickActions'
-import { mockProducts } from '../store/mockData'
-import type { StockAlert } from '../types'
+import type { Product, StockAlert } from '../types'
 
 const Dashboard = () => {
-  // Calcular estatísticas
-  const stats = useMemo(() => {
-    const totalProducts = mockProducts.length
-    const lowStockProducts = mockProducts.filter((p) => p.quantity <= p.minQuantity).length
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-    // Produtos adicionados nos últimos 7 dias
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    const recentProducts = mockProducts.filter((p) => new Date(p.addedDate) >= sevenDaysAgo).length
+  // Buscar produtos da API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/produtos')
+        if (!res.ok) throw new Error('Erro ao buscar produtos')
 
-    return {
-      totalProducts,
-      lowStockProducts,
-      recentProducts,
+        const data = await res.json()
+        setProducts(data)
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message)
+        } else {
+          setError('Erro desconhecido')
+        }
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchProducts()
   }, [])
 
-  // Gerar alertas
+  // Estatísticas
+  const stats = useMemo(() => {
+    if (loading || error || !products.length) {
+      return { totalProducts: 0, lowStockProducts: 0, recentProducts: 0 }
+    }
+
+    const totalProducts = products.length
+    const lowStockProducts = products.filter((p) => p.quantity <= p.minimum_quantity).length
+
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const recentProducts = products.filter((p) => {
+      if (!p.created_at) return false
+      return new Date(p.created_at) >= sevenDaysAgo
+    }).length
+
+    return { totalProducts, lowStockProducts, recentProducts }
+  }, [products, loading, error])
+
+  // Alertas
   const alerts: StockAlert[] = useMemo(() => {
-    return mockProducts
-      .filter((p) => p.quantity <= p.minQuantity)
+    if (loading || error) return []
+
+    return products
+      .filter((p) => p.quantity <= p.minimum_quantity)
       .map((product) => ({
         product,
         message:
           product.quantity === 0 ? 'Produto sem estoque!' : 'Estoque abaixo do mínimo recomendado',
         severity: product.quantity === 0 ? 'critical' : 'warning',
-      })) as StockAlert[]
-  }, [])
+      }))
+  }, [products, loading, error])
+
+  // Loading / Erro
+  if (loading) {
+    return (
+      <div className='p-8'>
+        <p className='text-gray-600 text-lg'>Carregando dados...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='p-8'>
+        <p className='text-red-500 text-lg'>Erro: {error}</p>
+      </div>
+    )
+  }
 
   return (
     <div className='p-8'>
