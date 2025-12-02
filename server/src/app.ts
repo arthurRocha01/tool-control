@@ -1,10 +1,7 @@
 import express, { type Application } from 'express'
-import dotenv from 'dotenv'
 import cors from 'cors'
 
 import productRoutes from './modules/product/infra/http/product.routes.js'
-
-dotenv.config()
 
 const app: Application = express()
 

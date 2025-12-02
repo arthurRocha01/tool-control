@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
-import { RouteInMemoryRepository } from '../repositories/route.in-memory-repository.js'
+import { ProductMysqlRepository } from '../repositories/product.mysql.repository.js'
 import { ListAllProductCaseUse } from '../../application/list-all-product.use-case.js'
 import { CreateProductUseCase } from '../../application/create-product.use-case.js'
 
 const router = Router()
 
-const repo = new RouteInMemoryRepository()
+const repo = new ProductMysqlRepository()
 
 router.get('/', async (req: Request, res: Response) => {
   const listAllUseCase = new ListAllProductCaseUse(repo)
