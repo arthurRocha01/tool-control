@@ -8,8 +8,8 @@ const loginUseCase = new LoginUseCase(new UserMysqlRepository())
 
 router.post('/login', async (req, res) => {
   try {
-    const { username } = req.body
-    const output = await loginUseCase.execute(username)
+    const { username, password } = req.body
+    const output = await loginUseCase.execute(username, password)
     res.status(201).json(output)
   } catch (error) {
     res.status(401).json({ success: false, error })
