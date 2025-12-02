@@ -43,6 +43,18 @@ export class ProductMysqlRepository implements ProductRepository {
     return product
   }
 
+  async findAll(): Promise<Product[]> {
+    const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM produtos`)
+    return rows.map(this.mapRowToProduct)
+  }
+
+  async findById(id: string): Promise<Product | null> {
+    const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM produtos WHERE id = ?`, [id])
+
+    if (!rows[0]) return null
+    return this.mapRowToProduct(rows[0])
+  }
+
   async save(product: Product): Promise<Product> {
     const { nome, marca, modelo, preco, caracteristicas } = product.getProps()
 
@@ -62,10 +74,5 @@ export class ProductMysqlRepository implements ProductRepository {
 
     product.adddMetaData(result.insertId.toString(), new Date(), new Date())
     return product
-  }
-
-  async findAll(): Promise<Product[]> {
-    const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM produtos`)
-    return rows.map(this.mapRowToProduct)
   }
 }

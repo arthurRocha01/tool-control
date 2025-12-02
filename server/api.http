@@ -1,7 +1,7 @@
-GET http://localhost:3000/produtos
+GET http://localhost:5000/produtos
 
 ###
-POST http://localhost:3000/produtos
+POST http://localhost:5000/produtos
 Content-Type: application/json
 
 {
@@ -17,3 +17,4 @@ Content-Type: application/json
 }
 
 ###
+GET http://localhost:5000/produtos/5

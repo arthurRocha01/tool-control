@@ -1,0 +1,44 @@
+-- =========================================
+-- Popular tabela de usuários
+-- =========================================
+INSERT INTO usuarios (nome, username, password) VALUES
+('João Silva', 'joaosilva', 'senha123'),
+('Maria Oliveira', 'mariao', 'senha123'),
+('Carlos Santos', 'carloss', 'senha123'),
+('Ana Pereira', 'anap', 'senha123'),
+('Lucas Costa', 'lucasc', 'senha123');
+
+-- =========================================
+-- Popular tabela de produtos
+-- =========================================
+INSERT INTO produtos (nome, marca, modelo, preco, descricao, tipo_material, tamanho, tensao) VALUES
+('Furadeira Elétrica', 'Bosch', 'X1000', 299.90, 'Furadeira potente para uso doméstico', 'Metal/Plástico', 'Médio', '220V'),
+('Parafusadeira', 'DeWalt', 'P200', 159.50, 'Parafusadeira a bateria', 'Plástico/Metal', 'Pequeno', '12V'),
+('Serra Circular', 'Makita', 'S300', 499.99, 'Serra circular portátil', 'Metal/Plástico', 'Grande', '220V'),
+('Martelo', 'Tramontina', 'M50', 49.90, 'Martelo de aço', 'Metal', 'Médio', 'N/A'),
+('Chave de Fenda Kit', 'Stanley', 'CF10', 79.90, 'Kit com 10 chaves de fenda', 'Metal/Plástico', 'Pequeno', 'N/A');
+
+-- =========================================
+-- Popular tabela de estoque
+-- =========================================
+INSERT INTO estoque (product_id, quantidade, quantidade_minima) VALUES
+(1, 50, 10),
+(2, 100, 20),
+(3, 30, 5),
+(4, 200, 50),
+(5, 150, 30);
+
+-- =========================================
+-- Popular tabela de movimentação de estoque
+-- =========================================
+INSERT INTO movimentacao_estoque (product_id, tipo, quantidade) VALUES
+(1, 'entrada', 50),
+(2, 'entrada', 100),
+(3, 'entrada', 30),
+(4, 'entrada', 200),
+(5, 'entrada', 150),
+(1, 'saida', 5),
+(2, 'saida', 10),
+(3, 'saida', 2),
+(4, 'saida', 20),
+(5, 'saida', 15);
