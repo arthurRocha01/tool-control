@@ -75,4 +75,28 @@ export class ProductMysqlRepository implements ProductRepository {
     product.adddMetaData(result.insertId.toString(), new Date(), new Date())
     return product
   }
+
+  async edit(product: Product): Promise<Product> {
+    const { nome, marca, modelo, preco, caracteristicas } = product.getProps()
+
+    await pool.query(
+      `UPDATE produtos 
+     SET nome = ?, marca = ?, modelo = ?, preco = ?, tipo_material = ?, tamanho = ?, tensao = ?, data_ultima_atualizacao = CURRENT_TIMESTAMP
+     WHERE id = ?`,
+      [
+        nome,
+        marca,
+        modelo,
+        preco,
+        caracteristicas.tipo_material,
+        caracteristicas.tamanho,
+        caracteristicas.tensao,
+        product['id'],
+      ],
+    )
+
+    product['data_ultima_atualizacao'] = new Date()
+
+    return product
+  }
 }

@@ -1,5 +1,3 @@
-// import crypt from 'crypto'
-
 type Caracteristicas = {
   tipo_material: string
   tamanho: string
@@ -35,6 +33,16 @@ export class Product {
   public static create(props: ProductProps): Product {
     const product = new Product(props)
     return product
+  }
+
+  public edit(data: ProductProps): Product {
+    this.nome = data.nome
+    this.marca = data.marca
+    this.modelo = data.modelo
+    this.preco = data.preco
+    this.caracteristicas = data.caracteristicas
+    this.data_ultima_atualizacao = new Date()
+    return this
   }
 
   public adddMetaData(id: string, data_criacao: Date, data_ultima_atualizacao: Date) {
