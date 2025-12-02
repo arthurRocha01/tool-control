@@ -1,3 +1,4 @@
+import { DeleteProductUseCase } from './../../application/delete-product.use-case.js'
 import { EditProductUseCase } from './../../application/edit-product.use-case.js'
 import { FindByIdProductUseCase } from './../../application/find-by-id-product.use-case.js'
 import { Router } from 'express'
@@ -32,6 +33,12 @@ router.put('/:id', async (req: Request, res: Response) => {
   const editProductUseCase = new EditProductUseCase(repo)
   const output = await editProductUseCase.execute({ id: req.params.id!, data: req.body })
   res.status(200).json(output)
+})
+
+router.delete('/:id', async (req: Request, res: Response) => {
+  const deleteProductUseCase = new DeleteProductUseCase(repo)
+  const output = await deleteProductUseCase.execute(req.params.id!)
+  res.status(201).json(output)
 })
 
 export default router

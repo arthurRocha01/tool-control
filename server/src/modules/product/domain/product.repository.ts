@@ -5,4 +5,5 @@ export interface ProductRepository {
   findById(id: string): Promise<Product | null>
   save(product: Product): Promise<Product>
   edit(product: Product): Promise<Product>
+  delete(id: string): Promise<void>
 }

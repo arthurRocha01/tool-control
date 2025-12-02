@@ -99,4 +99,8 @@ export class ProductMysqlRepository implements ProductRepository {
 
     return product
   }
+
+  async delete(id: string): Promise<void> {
+    await pool.query(`DELETE FROM produtos WHERE id = ?`, [id])
+  }
 }
