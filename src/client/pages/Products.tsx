@@ -1,19 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { StockStatus } from '../types'
-
-type Product = {
-  id: string
-  name: string
-  brand: string
-  model: string
-  quantity: number
-  minimum_quantity: number
-  description?: {
-    material_type?: string
-    voltage?: string
-  }
-}
+import { Product, StockStatus } from '../types'
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -34,38 +21,30 @@ const Products = () => {
     navigate(`/edit-product/${id}`)
   }
 
-  const handleDelete = async (id: string) => {
-    const confirmed = confirm('Tem certeza que deseja excluir este produto?')
-    if (!confirmed) return
+  const handleDelete = (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este produto?')) return
 
-    try {
-      await fetch(`http://localhost:5000/produtos/${id}`, {
-        method: 'DELETE',
+    fetch(`http://localhost:5000/produtos/${id}`, { method: 'DELETE' })
+      .then(() => setProducts((prev) => prev.filter((p) => p.id !== id)))
+      .catch((err) => {
+        console.error('Erro ao excluir produto:', err)
+        alert('Erro ao excluir produto.')
       })
-
-      setProducts((prev) => prev.filter((p) => p.id !== id))
-    } catch (err) {
-      console.error('Erro ao excluir produto:', err)
-      alert('Erro ao excluir produto.')
-    }
   }
 
   // ---- Carregar produtos ----
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    ;(async () => {
       try {
-        const response = await fetch('http://localhost:5000/produtos')
-        const data = await response.json()
-        setProducts(data)
-      } catch (error) {
-        console.error('Erro ao carregar produtos:', error)
+        const res = await fetch('http://localhost:5000/produtos')
+        setProducts(await res.json())
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err)
       } finally {
         setLoading(false)
       }
-    }
-
-    fetchProducts()
+    })()
   }, [])
 
   // ---- Filtros ----
@@ -166,7 +145,7 @@ const Products = () => {
                   {product.quantity}/{product.minimum_quantity}
                 </td>
                 <td className='p-3'>
-                  {getStockStatus(product.quantity, product.minimum_quantity)}
+                  {getStockStatus(parseInt(product.quantity), parseInt(product.minimum_quantity))}
                 </td>
                 <td className='p-3'>
                   {product.description?.material_type || product.description?.voltage || '-'}

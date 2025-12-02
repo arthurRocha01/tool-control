@@ -1,24 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Product, ProductFormData } from '../types'
+import { initialFormData, Product, ProductFormData } from '../types'
 
 const ProductEdit = () => {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [formData, setFormData] = useState<ProductFormData>({
-    name: '',
-    brand: '',
-    model: '',
-    price: 0,
-    quantity: 0,
-    minimum_quantity: 0,
-    description: {
-      material_type: '',
-      size: '',
-      voltage: '',
-    },
-  })
+  const [formData, setFormData] = useState<ProductFormData>(initialFormData)
 
   const [loading, setLoading] = useState(true)
 
@@ -26,32 +14,28 @@ const ProductEdit = () => {
   //  CARREGAR PRODUTO EXISTENTE
   // ---------------------------
   useEffect(() => {
-    const loadProduct = async () => {
+    ;(async () => {
       try {
         const res = await fetch(`http://localhost:5000/produtos/${id}`)
         const data: Product = await res.json()
 
-        setFormData({
-          name: data.name,
-          brand: data.brand,
-          model: data.model,
-          price: data.price,
-          quantity: data.quantity,
-          minimum_quantity: data.minimum_quantity,
-          description: {
-            material_type: data.description.material_type,
-            size: data.description.size,
-            voltage: data.description.voltage,
-          },
-        })
+        const { name, brand, model, price, quantity, minimum_quantity, description } = data
 
-        setLoading(false)
+        setFormData({
+          name,
+          brand,
+          model,
+          price,
+          quantity,
+          minimum_quantity,
+          description: { ...description },
+        })
       } catch (err) {
         console.error('Erro ao carregar produto', err)
+      } finally {
+        setLoading(false)
       }
-    }
-
-    loadProduct()
+    })()
   }, [id])
 
   // ---------------------------
@@ -60,17 +44,13 @@ const ProductEdit = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      await fetch(`http://localhost:5000/produtos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      navigate('/products')
-    } catch (err) {
-      console.error('Erro ao editar produto', err)
-    }
+    fetch(`http://localhost:5000/produtos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    })
+      .then(() => navigate('/products'))
+      .catch((err) => console.error('Erro ao editar produto', err))
   }
 
   // ---------------------------

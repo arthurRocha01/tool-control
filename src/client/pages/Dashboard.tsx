@@ -9,27 +9,15 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Buscar produtos da API
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/produtos')
+    fetch('http://localhost:5000/produtos')
+      .then((res) => {
         if (!res.ok) throw new Error('Erro ao buscar produtos')
-
-        const data = await res.json()
-        setProducts(data)
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError('Erro desconhecido')
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProducts()
+        return res.json() as Promise<Product[]>
+      })
+      .then((data) => setProducts(data))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erro desconhecido'))
+      .finally(() => setLoading(false))
   }, [])
 
   // Estatísticas
@@ -61,8 +49,10 @@ const Dashboard = () => {
       .map((product) => ({
         product,
         message:
-          product.quantity === 0 ? 'Produto sem estoque!' : 'Estoque abaixo do mínimo recomendado',
-        severity: product.quantity === 0 ? 'critical' : 'warning',
+          product.quantity === '0'
+            ? 'Produto sem estoque!'
+            : 'Estoque abaixo do mínimo recomendado',
+        severity: product.quantity === '0' ? 'critical' : 'warning',
       }))
   }, [products, loading, error])
 

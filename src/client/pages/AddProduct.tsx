@@ -1,75 +1,48 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { ProductFormData } from '../types'
+import { initialFormData, Product, type ProductFormData } from '../types'
 
 const AddProduct = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [formData, setFormData] = useState<ProductFormData>(initialFormData)
 
-  const [formData, setFormData] = useState<ProductFormData>({
-    name: '',
-    brand: '',
-    model: '',
-    price: 0,
-    quantity: 0,
-    minimum_quantity: 0,
-    description: {
-      material_type: '',
-      size: '',
-      voltage: '',
-    },
-    updated_at: Date.prototype,
-    created_at: Date.prototype,
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    try {
-      const payload = {
-        name: formData.name,
-        brand: formData.brand,
-        model: formData.model,
-        price: formData.price,
-        quantity: formData.quantity,
-        minimum_quantity: formData.minimum_quantity,
-        description: {
-          material_type: formData.description.material_type,
-          size: formData.description.size,
-          voltage: formData.description.voltage,
-        },
-      }
-
-      const response = await fetch('http://localhost:5000/produtos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+    fetch('http://localhost:5000/produtos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Erro ao cadastrar o produto')
+        return res.json() as Promise<Product>
       })
-
-      if (!response.ok) {
-        throw new Error('Erro ao cadastrar o produto')
-      }
-
-      alert('Produto cadastrado com sucesso!')
-      navigate('/products')
-    } catch (err) {
-      setError(`Erro ao cadastrar o produto. Tente novamente: ${err}`)
-    } finally {
-      setLoading(false)
-    }
+      .then(() => {
+        alert('Produto cadastrado com sucesso!')
+        navigate('/products')
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erro desconhecido'))
+      .finally(() => setLoading(false))
   }
 
   const handleInputChange = <K extends keyof ProductFormData>(
     field: K,
     value: ProductFormData[K],
   ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
   }
 
-  const handleCharacteristicChange = (field: string, value: string) => {
+  const handleDescriptionChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       description: {
@@ -137,6 +110,20 @@ const AddProduct = () => {
             </div>
           </div>
 
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>Preço *</label>
+            <input
+              type='number'
+              step='0.01'
+              required
+              min='0'
+              value={formData.price}
+              onChange={(e) => handleInputChange('price', e.target.value)}
+              placeholder='0.00'
+              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            />
+          </div>
+
           {/* Estoque */}
           <div>
             <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2'>
@@ -153,7 +140,7 @@ const AddProduct = () => {
                   required
                   min='0'
                   value={formData.quantity}
-                  onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange('quantity', e.target.value)}
                   placeholder='0'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
@@ -168,9 +155,7 @@ const AddProduct = () => {
                   required
                   min='0'
                   value={formData.minimum_quantity}
-                  onChange={(e) =>
-                    handleInputChange('minimum_quantity', parseInt(e.target.value) || 0)
-                  }
+                  onChange={(e) => handleInputChange('minimum_quantity', e.target.value)}
                   placeholder='0'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
@@ -195,7 +180,7 @@ const AddProduct = () => {
                 <input
                   type='text'
                   value={formData.description.material_type}
-                  onChange={(e) => handleCharacteristicChange('material', e.target.value)}
+                  onChange={(e) => handleDescriptionChange('material_type', e.target.value)}
                   placeholder='Ex: Aço Carbono'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
@@ -206,7 +191,7 @@ const AddProduct = () => {
                 <input
                   type='text'
                   value={formData.description.size}
-                  onChange={(e) => handleCharacteristicChange('size', e.target.value)}
+                  onChange={(e) => handleDescriptionChange('size', e.target.value)}
                   placeholder='Ex: 15cm'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
@@ -219,7 +204,7 @@ const AddProduct = () => {
                 <input
                   type='text'
                   value={formData.description.voltage}
-                  onChange={(e) => handleCharacteristicChange('voltage', e.target.value)}
+                  onChange={(e) => handleDescriptionChange('voltage', e.target.value)}
                   placeholder='Ex: 110V'
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />

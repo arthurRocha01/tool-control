@@ -3,9 +3,9 @@ export interface Product {
   name: string
   brand: string
   model: string
-  price: number
-  quantity: number
-  minimum_quantity: number
+  price: string
+  quantity: string
+  minimum_quantity: string
   description: {
     material_type: string
     size: string
@@ -18,6 +18,20 @@ export interface Product {
 export type StockStatus = 'all' | 'low' | 'ok'
 
 export type ProductFormData = Omit<Product, 'id'>
+
+export const initialFormData: ProductFormData = {
+  name: '',
+  brand: '',
+  model: '',
+  price: '',
+  quantity: '',
+  minimum_quantity: '',
+  description: {
+    material_type: '',
+    size: '',
+    voltage: '',
+  },
+}
 
 export interface StockAlert {
   product: Product
