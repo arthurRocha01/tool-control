@@ -19,7 +19,6 @@ app.use('/produtos', productRoutes)
 
 // Servir React
 const frontendPath = path.join(__dirname, '../../dist')
-console.log(frontendPath)
 app.use(express.static(frontendPath))
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.accepts('html')) {

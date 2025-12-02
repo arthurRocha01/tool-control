@@ -4,60 +4,52 @@ import { pool } from '../../../../core/database/connection.js'
 import type { OkPacket, RowDataPacket } from 'mysql2'
 
 interface ProdutoRow extends RowDataPacket {
-  nome: string
-  marca: string
-  modelo: string
-  preco: number
-  tipo_material: string
-  tamanho: string
-  tensao: string
+  name: string
+  brand: string
+  model: string
+  price: number
+  material_type: string
+  size: string
+  voltage: string
 }
 
 export class ProductMysqlRepository implements ProductRepository {
   private mapRowToProduct(row: ProdutoRow): Product {
     const product = Product.create({
-      nome: row.nome,
-      marca: row.marca,
-      modelo: row.modelo,
-      preco: row.preco,
-      caracteristicas: {
-        tipo_material: row.tipo_material,
-        tamanho: row.tamanho,
-        tensao: row.tensao,
+      name: row.name,
+      brand: row.brand,
+      model: row.model,
+      price: row.price,
+      description: {
+        material_type: row.material_type,
+        size: row.size,
+        voltage: row.voltage,
       },
     })
 
-    product._setMetaData(row.id, row.data_criacao, row.data_ultima_atualizacao)
+    product._setMetaData(row.id, row.data_criacao, row.updated_at)
     return product
   }
 
   async findAll(): Promise<Product[] | null> {
-    const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM produtos`)
+    const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM products`)
     if (rows.length == 0) return null
     return rows.map(this.mapRowToProduct)
   }
 
   async findById(id: string): Promise<Product | null> {
-    const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM produtos WHERE id = ?`, [id])
+    const [rows] = await pool.query<ProdutoRow[]>(`SELECT * FROM products WHERE id = ?`, [id])
     if (!rows[0]) return null
     return this.mapRowToProduct(rows[0])
   }
 
   async save(product: Product): Promise<Product> {
-    const { nome, marca, modelo, preco, caracteristicas } = product.getProps()
+    const { name, brand, model, price, description } = product.getProps()
 
     const [result] = await pool.query<OkPacket>(
-      `INSERT INTO produtos (nome, marca, modelo, preco, tipo_material, tamanho, tensao)
+      `INSERT INTO products (name, brand, model, price, material_type, size, voltage)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        nome,
-        marca,
-        modelo,
-        preco,
-        caracteristicas.tipo_material,
-        caracteristicas.tamanho,
-        caracteristicas.tensao,
-      ],
+      [name, brand, model, price, description.material_type, description.size, description.voltage],
     )
 
     product._setMetaData(result.insertId.toString(), new Date(), new Date())
@@ -65,20 +57,20 @@ export class ProductMysqlRepository implements ProductRepository {
   }
 
   async edit(product: Product): Promise<Product> {
-    const { nome, marca, modelo, preco, caracteristicas } = product.getProps()
+    const { name, brand, model, price, description } = product.getProps()
 
     await pool.query(
-      `UPDATE produtos 
-      SET nome = ?, marca = ?, modelo = ?, preco = ?, tipo_material = ?, tamanho = ?, tensao = ?, data_ultima_atualizacao = CURRENT_TIMESTAMP
+      `UPDATE products 
+      SET name = ?, brand = ?, model = ?, price = ?, material_type = ?, size = ?, voltage = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?`,
       [
-        nome,
-        marca,
-        modelo,
-        preco,
-        caracteristicas.tipo_material,
-        caracteristicas.tamanho,
-        caracteristicas.tensao,
+        name,
+        brand,
+        model,
+        price,
+        description.material_type,
+        description.size,
+        description.voltage,
         product.getId(),
       ],
     )
@@ -88,6 +80,6 @@ export class ProductMysqlRepository implements ProductRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await pool.query(`DELETE FROM produtos WHERE id = ?`, [id])
+    await pool.query(`DELETE FROM products WHERE id = ?`, [id])
   }
 }

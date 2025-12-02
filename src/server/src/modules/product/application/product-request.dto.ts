@@ -1,11 +1,13 @@
 export interface ProductRequestDTO {
-  nome: string
-  marca: string
-  modelo: string
-  preco: number
-  caracteristicas: {
-    tipo_material: string
-    tamanho: string
-    tensao: string
+  name: string
+  brand: string
+  model: string
+  price: number
+  description: {
+    material_type: string
+    size: string
+    voltage: string
   }
+  quantity: number
+  minimum_quantity: number
 }

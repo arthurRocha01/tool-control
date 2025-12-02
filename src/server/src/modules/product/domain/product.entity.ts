@@ -1,26 +1,26 @@
-type Caracteristicas = {
-  tipo_material: string
-  tamanho: string
-  tensao: string
+type DescriptionProduct = {
+  material_type: string
+  size: string
+  voltage: string
 }
 
 export interface ProductProps {
-  nome: string
-  marca: string
-  modelo: string
-  preco: number
-  caracteristicas: Caracteristicas
+  name: string
+  brand: string
+  model: string
+  price: number
+  description: DescriptionProduct
 }
 
 export class Product {
   private id?: string
-  private nome!: string
-  private marca!: string
-  private modelo!: string
-  private preco!: number
-  private caracteristicas!: Caracteristicas
-  private data_criacao?: Date
-  private data_ultima_atualizacao?: Date
+  private name!: string
+  private brand!: string
+  private model!: string
+  private price!: number
+  private description!: DescriptionProduct
+  private created_at?: Date
+  private updated_at?: Date
 
   private constructor(props: ProductProps) {
     Object.assign(this, props)
@@ -32,30 +32,30 @@ export class Product {
 
   public edit(props: Partial<ProductProps>): Product {
     Object.assign(this, props)
-    if (props.caracteristicas) {
-      this.caracteristicas = { ...this.caracteristicas, ...props.caracteristicas }
+    if (props.description) {
+      this.description = { ...this.description, ...props.description }
     }
-    this.data_ultima_atualizacao = new Date()
+    this.updated_at = new Date()
     return this
   }
 
-  public _setMetaData(id: string, data_criacao: Date, data_ultima_atualizacao: Date) {
+  public _setMetaData(id: string, created_at: Date, updated_at: Date) {
     this.id = id
-    this.data_criacao = data_criacao
-    this.data_ultima_atualizacao = data_ultima_atualizacao
+    this.created_at = created_at
+    this.updated_at = updated_at
   }
 
   public updatedLastModified() {
-    this.data_ultima_atualizacao = new Date()
+    this.updated_at = new Date()
   }
 
   public getProps(): ProductProps {
     return {
-      nome: this.nome,
-      marca: this.marca,
-      modelo: this.modelo,
-      preco: this.preco,
-      caracteristicas: this.caracteristicas,
+      name: this.name,
+      brand: this.brand,
+      model: this.model,
+      price: this.price,
+      description: this.description,
     }
   }
 

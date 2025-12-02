@@ -7,14 +7,14 @@ export class CreateProductUseCase {
 
   async execute(data: ProductRequestDTO): Promise<Product> {
     const product = Product.create({
-      nome: data.nome,
-      marca: data.marca,
-      modelo: data.modelo,
-      preco: data.preco,
-      caracteristicas: {
-        tipo_material: data.caracteristicas.tipo_material,
-        tamanho: data.caracteristicas.tamanho,
-        tensao: data.caracteristicas.tensao,
+      name: data.name,
+      brand: data.brand,
+      model: data.model,
+      price: data.price,
+      description: {
+        material_type: data.description.material_type,
+        size: data.description.size,
+        voltage: data.description.voltage,
       },
     })
 
