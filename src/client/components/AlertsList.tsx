@@ -1,4 +1,4 @@
-import type { StockAlert } from '../types'
+import { StockAlert } from '../types'
 
 interface AlertsListProps {
   alerts: StockAlert[]
@@ -46,7 +46,7 @@ const AlertsList = ({ alerts }: AlertsListProps) => {
               <p className='font-medium text-gray-900 mb-1'>{alert.product.name}</p>
               <p className='text-sm text-gray-600'>{alert.message}</p>
               <p className='text-xs text-gray-500 mt-1'>
-                Estoque atual: {alert.product.quantity} | Mínimo: {alert.product.minQuantity}
+                Estoque atual: {alert.product.quantity} | Mínimo: {alert.product.minimum_quantity}
               </p>
             </div>
           </div>

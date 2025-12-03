@@ -54,9 +54,7 @@ const QuickActions = () => {
             className='group flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all'
           >
             <div
-              className={`p-3 rounded-lg ${
-                colorClasses[action.color as keyof typeof colorClasses]
-              } transition-colors`}
+              className={`p-3 rounded-lg ${colorClasses[action.color as keyof typeof colorClasses]} transition-colors`}
             >
               <i className={`hgi-stroke hgi-${action.icon} text-xl`}></i>
             </div>

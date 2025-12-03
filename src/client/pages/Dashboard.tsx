@@ -6,64 +6,60 @@ import type { Product, StockAlert } from '../types'
 
 const Dashboard = () => {
   const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Carregar produtos do backend
   useEffect(() => {
-    fetch('http://localhost:5000/produtos')
-      .then((res) => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/produtos')
         if (!res.ok) throw new Error('Erro ao buscar produtos')
-        return res.json() as Promise<Product[]>
-      })
-      .then((data) => setProducts(data))
-      .catch((err) => setError(err instanceof Error ? err.message : 'Erro desconhecido'))
-      .finally(() => setLoading(false))
+        const data: Product[] = await res.json()
+        setProducts(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro desconhecido')
+      }
+    }
+
+    fetchProducts()
   }, [])
 
   // Estatísticas
   const stats = useMemo(() => {
-    if (loading || error || !products.length) {
+    if (error || !products.length) {
       return { totalProducts: 0, lowStockProducts: 0, recentProducts: 0 }
     }
 
     const totalProducts = products.length
-    const lowStockProducts = products.filter((p) => p.quantity <= p.minimum_quantity).length
+    const lowStockProducts = products.filter(
+      (p) => parseInt(p.quantity) <= parseInt(p.minimum_quantity),
+    ).length
 
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
     const recentProducts = products.filter((p) => {
-      if (!p.created_at) return false
-      return new Date(p.created_at) >= sevenDaysAgo
+      if (!p.updated_at) return false
+      return new Date(p.updated_at) >= sevenDaysAgo
     }).length
 
     return { totalProducts, lowStockProducts, recentProducts }
-  }, [products, loading, error])
+  }, [products, error])
 
   // Alertas
   const alerts: StockAlert[] = useMemo(() => {
-    if (loading || error) return []
+    if (error) return []
 
     return products
-      .filter((p) => p.quantity <= p.minimum_quantity)
+      .filter((p) => parseInt(p.quantity) <= parseInt(p.minimum_quantity))
       .map((product) => ({
         product,
         message:
-          product.quantity === '0'
+          parseInt(product.quantity) === 0
             ? 'Produto sem estoque!'
             : 'Estoque abaixo do mínimo recomendado',
-        severity: product.quantity === '0' ? 'critical' : 'warning',
+        severity: parseInt(product.quantity) === 0 ? 'critical' : 'warning',
       }))
-  }, [products, loading, error])
-
-  // Loading / Erro
-  if (loading) {
-    return (
-      <div className='p-8'>
-        <p className='text-gray-600 text-lg'>Carregando dados...</p>
-      </div>
-    )
-  }
+  }, [products, error])
 
   if (error) {
     return (
@@ -98,7 +94,7 @@ const Dashboard = () => {
         />
         <IndicatorCard
           icon='add-circle'
-          title='Adicionados Recentemente'
+          title='Atualizados Recentemente'
           value={stats.recentProducts}
           subtitle='Últimos 7 dias'
           variant='success'

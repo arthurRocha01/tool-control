@@ -1,62 +1,104 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { initialFormData, Product, type ProductFormData } from '../types'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Product, ProductFormData, initialFormData } from '../types'
 
 const AddProduct = () => {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const isEditMode = !!id
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState<ProductFormData>(initialFormData)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Carregar produto para edição
+  useEffect(() => {
+    if (!isEditMode || !id) return
+
+    let isMounted = true // Evita setState se o componente for desmontado
+
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        const res = await fetch(`http://localhost:5000/produtos/${id}`)
+        if (!res.ok) throw new Error('Produto não encontrado')
+        const product: Product = await res.json()
+        if (isMounted) {
+          setFormData({
+            name: product.name,
+            brand: product.brand,
+            model: product.model,
+            price: product.price,
+            quantity: product.quantity,
+            minimum_quantity: product.minimum_quantity,
+            description: product.description,
+          })
+        }
+      } catch (err) {
+        if (isMounted) setError(err instanceof Error ? err.message : 'Erro desconhecido')
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    fetchProduct()
+
+    return () => {
+      isMounted = false
+    }
+  }, [id, isEditMode])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    fetch('http://localhost:5000/produtos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Erro ao cadastrar o produto')
-        return res.json() as Promise<Product>
+    const method = isEditMode ? 'PUT' : 'POST'
+    const url = isEditMode
+      ? `http://localhost:5000/produtos/${id}`
+      : 'http://localhost:5000/produtos'
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       })
-      .then(() => {
-        alert('Produto cadastrado com sucesso!')
-        navigate('/products')
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : 'Erro desconhecido'))
-      .finally(() => setLoading(false))
+      if (!res.ok)
+        throw new Error(isEditMode ? 'Erro ao atualizar o produto' : 'Erro ao cadastrar o produto')
+      await res.json()
+      alert(isEditMode ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!')
+      navigate('/products')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleInputChange = <K extends keyof ProductFormData>(
     field: K,
     value: ProductFormData[K],
   ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleDescriptionChange = (field: string, value: string) => {
+  const handleDescriptionChange = (field: keyof ProductFormData['description'], value: string) => {
     setFormData((prev) => ({
       ...prev,
-      description: {
-        ...prev.description,
-        [field]: value,
-      },
+      description: { ...prev.description, [field]: value },
     }))
   }
 
   return (
     <div className='p-8'>
       <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-900 mb-2'>Cadastrar Produto</h1>
-        <p className='text-gray-600'>Adicione um novo item ao estoque</p>
+        <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+          {isEditMode ? 'Editar Produto' : 'Cadastrar Produto'}
+        </h1>
+        <p className='text-gray-600'>
+          {isEditMode ? 'Atualize as informações do produto' : 'Adicione um novo item ao estoque'}
+        </p>
       </div>
 
       <div className='bg-white rounded-xl p-8 border border-gray-200 max-w-4xl'>
@@ -83,7 +125,6 @@ const AddProduct = () => {
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
-
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>Marca *</label>
                 <input
@@ -95,7 +136,6 @@ const AddProduct = () => {
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
-
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>Modelo *</label>
                 <input
@@ -107,21 +147,20 @@ const AddProduct = () => {
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>Preço *</label>
+                <input
+                  type='number'
+                  required
+                  min='0'
+                  step='0.01'
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
+                  placeholder='0.00'
+                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                />
+              </div>
             </div>
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>Preço *</label>
-            <input
-              type='number'
-              step='0.01'
-              required
-              min='0'
-              value={formData.price}
-              onChange={(e) => handleInputChange('price', e.target.value)}
-              placeholder='0.00'
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-            />
           </div>
 
           {/* Estoque */}
@@ -145,7 +184,6 @@ const AddProduct = () => {
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
-
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Quantidade Mínima *
@@ -185,7 +223,6 @@ const AddProduct = () => {
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
-
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>Tamanho</label>
                 <input
@@ -196,7 +233,6 @@ const AddProduct = () => {
                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               </div>
-
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Tensão Elétrica
@@ -220,7 +256,7 @@ const AddProduct = () => {
               className='flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium'
             >
               <i className='hgi-stroke hgi-checkmark-circle-01'></i>
-              {loading ? 'Salvando...' : 'Salvar Produto'}
+              {loading ? 'Salvando...' : isEditMode ? 'Atualizar Produto' : 'Salvar Produto'}
             </button>
             <button
               type='button'
