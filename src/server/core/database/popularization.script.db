@@ -8,13 +8,15 @@ INSERT INTO users (name, username, password) VALUES
 
 -- Popular tabela de produtos
 INSERT INTO products (name, brand, model, price, description, material_type, size, voltage, quantity, minimum_quantity) VALUES
-('Electric Drill', 'Bosch', 'X123', 199.99, 'Powerful cordless drill', 'Metal/Plastic', 'Medium', '220V', 10, 2),
-('Hammer', 'Stanley', 'H456', 29.90, 'Steel hammer with rubber grip', 'Steel/Rubber', 'Standard', 'N/A', 50, 5),
-('Screwdriver Set', 'DeWalt', 'SD789', 49.99, 'Set of 6 screwdrivers', 'Steel/Plastic', 'Small', 'N/A', 30, 3),
-('Circular Saw', 'Makita', 'CS101', 299.50, 'High-speed circular saw', 'Metal/Plastic', 'Large', '220V', 5, 1),
-('Wrench Set', 'Craftsman', 'W202', 79.99, 'Set of 10 wrenches', 'Steel', 'Various', 'N/A', 20, 2),
-('LED Work Light', 'Philips', 'LW303', 39.99, 'Portable LED light', 'Plastic/Metal', 'Medium', '110V', 15, 2),
-('Measuring Tape', 'Stanley', 'MT404', 15.50, '5m retractable tape', 'Plastic/Metal', 'Small', 'N/A', 40, 5),
-('Angle Grinder', 'Bosch', 'AG505', 129.90, 'Compact angle grinder', 'Metal/Plastic', 'Medium', '220V', 8, 1),
-('Toolbox', 'Keter', 'TB606', 59.99, 'Durable plastic toolbox', 'Plastic', 'Large', 'N/A', 12, 2),
-('Cordless Screwdriver', 'DeWalt', 'CS707', 89.99, 'Battery operated screwdriver', 'Metal/Plastic', 'Small', '110V', 10, 2);
+('Parafusadeira Elétrica', 'Bosch', 'GSR 12V', 499.90, 'Parafusadeira compacta com bateria de lítio', 'Metal/Plástico', 'Compacta', '12V', 5, 3),
+('Furadeira de Impacto', 'Makita', 'HP1631K', 350.00, 'Furadeira com impacto para concreto e madeira', 'Metal/Plástico', 'Média', '220V', 12, 5),
+('Lâmpada LED', 'Philips', 'LED10W', 15.50, 'Lâmpada LED de baixo consumo', 'Vidro/Plástico', 'Padrão', '220V', 2, 5),
+('Extensão Elétrica', 'Tramontina', 'EXT5M', 29.90, 'Cabo de extensão de 5 metros', 'Plástico/Cobre', '5m', '220V', 15, 10),
+('Par de Luvas de Proteção', '3M', 'LuvaSeg', 35.00, 'Luvas de segurança para trabalhos industriais', 'Borracha', 'M', '-', 8, 5),
+('Óculos de Proteção', 'Vonder', 'OculoSafe', 25.00, 'Óculos para proteção contra poeira e partículas', 'Plástico', 'Único', '-', 3, 5),
+('Martelo de Borracha', 'Stanley', 'MTL-300', 45.00, 'Martelo com cabeça de borracha', 'Madeira/Borracha', 'Médio', '-', 6, 3),
+('Serra Tico-Tico', 'Bosch', 'GST 650', 420.00, 'Serra tico-tico para madeira e plástico', 'Metal/Plástico', 'Médio', '220V', 4, 5),
+('Alicate Universal', 'Vonder', 'ALC-200', 60.00, 'Alicate para corte e aperto de materiais', 'Metal/Plástico', 'Médio', '-', 10, 5),
+('Fita Isolante', '3M', 'FITA-PT', 7.50, 'Fita isolante elétrica 20 metros', 'Plástico', '20m', '-', 20, 10),
+('Par de Botas de Segurança', 'SoliBoot', 'BS-900', 120.00, 'Botas com biqueira de aço', 'Couro/Plástico', '42', '-', 2, 3),
+('Multímetro Digital', 'Minipa', 'ET-1000', 180.00, 'Medidor digital de tensão, corrente e resistência', 'Plástico/Metal', 'Portátil', '-', 5, 5);
