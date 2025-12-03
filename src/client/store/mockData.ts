@@ -29,18 +29,23 @@ export const getProductsFromAPI = async (): Promise<Product[]> => {
   }
 }
 
-// Helper functions para localStorage
-export const getStoredProducts = async (): Promise<Product[]> => {
-  const stored = localStorage.getItem('products')
-  if (stored) return JSON.parse(stored)
-  // Caso não tenha nada no localStorage, buscar da API
-  const products = await getProductsFromAPI()
-  localStorage.setItem('products', JSON.stringify(products))
-  return products
-}
-
 export const saveProducts = (products: Product[]) => {
   localStorage.setItem('products', JSON.stringify(products))
+}
+
+export const saveProduct = (product: Product) => {
+  fetch('http://localhost:5000/produtos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(product),
+  })
+    .then((data) => {
+      alert('Produto cadastrado com sucesso!')
+      console.log(data.json())
+    })
+    .catch(() => console.log('Erro ao salvar produto'))
 }
 
 export const getStoredUser = (): User | null => {

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../store/authStore'
 
 const Login = () => {
   const navigate = useNavigate()
+  const login = useAuthStore((state) => state.loginAPI)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -14,22 +16,16 @@ const Login = () => {
     setError('')
     setLoading(true)
 
-    fetch('http://localhost:5000/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) navigate('/app')
-        else alert('Autenticação falhou')
-      })
-      .finally(() => setLoading(false))
+    setTimeout(() => {
+      const success = login(username, password)
+
+      if (!success) {
+        setError('Usuário ou senha incorretos')
+      } else {
+        navigate('/')
+      }
+      setLoading(false)
+    }, 500)
   }
 
   return (

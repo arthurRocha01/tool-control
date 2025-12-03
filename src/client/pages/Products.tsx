@@ -1,31 +1,19 @@
-import { useEffect, useState, useMemo } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useProductsStore } from '../store/productsStore'
 import { Product } from '../types'
 
 const Products = () => {
   const navigate = useNavigate()
-  const [products, setProducts] = useState<Product[]>([])
+  const { products, initProducts, deleteProduct } = useProductsStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [brandFilter, setBrandFilter] = useState('')
   const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'ok'>('all')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
 
-  // Carregar produtos do backend
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/produtos')
-        const data = await res.json()
-        setProducts(data)
-      } catch (err) {
-        console.error('Erro ao carregar produtos:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchProducts()
-  }, [])
+    initProducts()
+  }, [initProducts])
 
   // Filtrar produtos
   const filteredProducts = useMemo(() => {
@@ -48,6 +36,7 @@ const Products = () => {
     })
   }, [products, searchTerm, brandFilter, stockFilter])
 
+  // Lista de marcas únicas
   const brands = useMemo(() => {
     return [...new Set(products.map((p) => p.brand))].sort()
   }, [products])
@@ -55,25 +44,23 @@ const Products = () => {
   const getStockStatus = (product: Product) => {
     const qty = parseInt(product.quantity)
     const minQty = parseInt(product.minimum_quantity)
+
     if (qty === 0) return { label: 'Sem estoque', color: 'red' }
     if (qty <= minQty) return { label: 'Estoque baixo', color: 'orange' }
     return { label: 'OK', color: 'green' }
   }
 
-  const handleEdit = (id: string) => navigate(`/edit-product/${id}`)
-  const handleDelete = (id: string) => setDeleteConfirm(id)
-  const confirmDelete = async () => {
-    if (!deleteConfirm) return
+  const handleEdit = (id: string) => {
+    navigate(`/edit-product/${id}`)
+  }
 
-    try {
-      await fetch(`http://localhost:5000/produtos/${deleteConfirm}`, {
-        method: 'DELETE',
-      })
-      // Remove o produto do estado local
-      setProducts((prev) => prev.filter((p) => p.id !== deleteConfirm))
-    } catch (err) {
-      console.error('Erro ao excluir produto:', err)
-    } finally {
+  const handleDelete = (id: string) => {
+    setDeleteConfirm(id)
+  }
+
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      deleteProduct(deleteConfirm)
       setDeleteConfirm(null)
     }
   }
@@ -90,13 +77,8 @@ const Products = () => {
     })
   }
 
-  if (loading) {
-    return <div className='p-8 text-gray-600'>Carregando produtos...</div>
-  }
-
   return (
     <div className='p-8'>
-      {/* Cabeçalho */}
       <div className='mb-8 flex items-center justify-between'>
         <div>
           <h1 className='text-3xl font-bold text-gray-900 mb-2'>Listagem de Produtos</h1>
@@ -114,6 +96,7 @@ const Products = () => {
       {/* Filtros */}
       <div className='bg-white rounded-xl p-6 border border-gray-200 mb-6'>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          {/* Busca */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
               <i className='hgi-stroke hgi-search-01'></i> Buscar
@@ -127,6 +110,7 @@ const Products = () => {
             />
           </div>
 
+          {/* Filtro por marca */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
               <i className='hgi-stroke hgi-filter'></i> Marca
@@ -145,6 +129,7 @@ const Products = () => {
             </select>
           </div>
 
+          {/* Filtro por estoque */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
               <i className='hgi-stroke hgi-package'></i> Status Estoque
@@ -198,10 +183,13 @@ const Products = () => {
               {filteredProducts.map((product) => {
                 const status = getStockStatus(product)
                 const isLowStock = parseInt(product.quantity) <= parseInt(product.minimum_quantity)
+
                 return (
                   <tr
                     key={product.id}
-                    className={`hover:bg-gray-50 transition-colors ${isLowStock ? 'bg-orange-50' : ''}`}
+                    className={`hover:bg-gray-50 transition-colors ${
+                      isLowStock ? 'bg-orange-50' : ''
+                    }`}
                   >
                     <td className='px-6 py-4'>
                       <div className='font-medium text-gray-900'>{product.name}</div>
@@ -284,7 +272,7 @@ const Products = () => {
         )}
       </div>
 
-      {/* Delete Modal */}
+      {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
           <div className='bg-white rounded-xl p-6 max-w-md w-full'>
@@ -297,7 +285,9 @@ const Products = () => {
                 <p className='text-sm text-gray-600'>Esta ação não pode ser desfeita</p>
               </div>
             </div>
+
             <p className='text-gray-700 mb-6'>Tem certeza que deseja excluir este produto?</p>
+
             <div className='flex gap-3'>
               <button
                 onClick={confirmDelete}

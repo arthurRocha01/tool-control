@@ -6,6 +6,7 @@ interface AuthStore {
   currentUser: User | null
   isAuthenticated: boolean
   login: (username: string, password: string) => boolean
+  loginAPI: (username: string, password: string) => Promise<boolean>
   logout: () => void
   initAuth: () => void
 }
@@ -31,6 +32,17 @@ export const useAuthStore = create<AuthStore>((set) => ({
       return true
     }
     return false
+  },
+
+  loginAPI: async (username: string, password: string): Promise<boolean> => {
+    return fetch('http://localhost:5000/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    })
+      .then((res) => res.json())
+      .then((data) => data.success === true)
+      .catch(() => false)
   },
 
   logout: () => {

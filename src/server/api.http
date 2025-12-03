@@ -1,3 +1,4 @@
+// product
 GET http://localhost:5000/produtos
 
 ###
@@ -43,7 +44,6 @@ Content-Type: application/json
 DELETE http://localhost:5000/produtos/9 HTTP/1.1
 
 // auth
-
 ###
 POST http://localhost:5000/auth/login HTTP/1.1
 Content-Type: application/json
