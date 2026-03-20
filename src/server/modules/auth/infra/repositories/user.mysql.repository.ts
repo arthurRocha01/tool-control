@@ -1,15 +1,21 @@
-import type { RowDataPacket } from 'mysql2'
 import { pool } from '../../../../core/database/connection'
 import { User } from '../../domain/user.entity'
 import type { UserRepository } from '../../domain/user.repository'
 
+interface UserRow {
+  id: string;
+  name: string;
+  username: string;
+  password: string;
+}
+
 export class UserMysqlRepository implements UserRepository {
   async findByName(username: string): Promise<User | null> {
-    const [row] = await pool.query<RowDataPacket[]>('SELECT * FROM users WHERE username = ?', [
+    const { rows } = await pool.query<UserRow>('SELECT * FROM users WHERE username = $1 LIMIT 1', [
       username,
     ])
 
-    const userData = row[0]
+    const userData = rows[0]
     if (!userData) return null
 
     return User.create({

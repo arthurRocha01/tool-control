@@ -1,12 +1,12 @@
-import mysql, { type Pool } from 'mysql2/promise'
+import { Pool, type PoolConfig } from 'pg'
 import { env } from '../config/env.js'
 
-export const pool: Pool = mysql.createPool({
-  host: env.database.host!,
-  user: env.database.user!,
-  password: env.database.password!,
-  database: env.database.name!,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-})
+const poolConfig: PoolConfig = {
+  connectionString: env.database.url,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
+}
+
+
+export const pool: Pool = new Pool(poolConfig)
