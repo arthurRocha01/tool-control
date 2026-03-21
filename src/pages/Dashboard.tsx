@@ -8,7 +8,6 @@ const Dashboard = () => {
   const [products, setProducts] = useState<Product[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  // Carregar produtos do backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -24,7 +23,6 @@ const Dashboard = () => {
     fetchProducts()
   }, [])
 
-  // Estatísticas
   const stats = useMemo(() => {
     if (error || !products.length) {
       return { totalProducts: 0, lowStockProducts: 0, recentProducts: 0 }
@@ -45,7 +43,6 @@ const Dashboard = () => {
     return { totalProducts, lowStockProducts, recentProducts }
   }, [products, error])
 
-  // Alertas
   const alerts: StockAlert[] = useMemo(() => {
     if (error) return []
 

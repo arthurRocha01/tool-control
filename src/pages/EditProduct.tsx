@@ -9,9 +9,6 @@ const ProductEdit = () => {
   const [formData, setFormData] = useState<ProductFormData>(initialFormData)
   const [loading, setLoading] = useState(true)
 
-  // ---------------------------
-  //  CARREGAR PRODUTO EXISTENTE
-  // ---------------------------
   useEffect(() => {
     if (!id) return
     ;(async () => {
@@ -36,9 +33,6 @@ const ProductEdit = () => {
     })()
   }, [id])
 
-  // ---------------------------
-  // FUNÇÃO DE UPDATE
-  // ---------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!id) return

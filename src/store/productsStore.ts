@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { Product } from '../types'
-import { getProductsFromAPI, saveProduct, saveProducts } from './mockData'
+import { getProductsFromAPI, saveProduct } from './handlerData'
 
 interface ProductsStore {
   products: Product[]
@@ -27,7 +27,6 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     }
     const updatedProducts = [...get().products, newProduct]
     set({ products: updatedProducts })
-    saveProducts(updatedProducts)
 
     saveProduct(newProduct)
   },
@@ -49,7 +48,6 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
 
     const updatedProducts = get().products.filter((p) => p.id !== id)
     set({ products: updatedProducts })
-    saveProducts(updatedProducts)
   },
 
   getProductById: (id) => {

@@ -1,52 +1,38 @@
 import { create } from 'zustand'
 import { type User } from '../types'
-import { mockUsers, getStoredUser, saveUser } from './mockData'
 
 interface AuthStore {
   currentUser: User | null
   isAuthenticated: boolean
-  login: (username: string, password: string) => boolean
   loginAPI: (username: string, password: string) => Promise<boolean>
-  logout: () => void
-  initAuth: () => void
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   currentUser: null,
   isAuthenticated: false,
 
-  initAuth: () => {
-    const storedUser = getStoredUser()
-    if (storedUser) {
-      set({ currentUser: storedUser, isAuthenticated: true })
-    }
-  },
-
-  login: (username: string, password: string) => {
-    const user = mockUsers.find((u) => u.username === username && u.password === password)
-
-    if (user) {
-      const userWithoutPassword = { ...user, password: '' }
-      saveUser(userWithoutPassword)
-      set({ currentUser: userWithoutPassword, isAuthenticated: true })
-      return true
-    }
-    return false
-  },
-
   loginAPI: async (username: string, password: string): Promise<boolean> => {
-    return fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    })
-      .then((res) => res.json())
-      .then((data) => data.success === true)
-      .catch(() => false)
-  },
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      })
 
-  logout: () => {
-    saveUser(null)
-    set({ currentUser: null, isAuthenticated: false })
+      if (response.ok) {
+        const data = await response.json()
+
+        const userLogged = data.user || { username, role: 'admin' }
+
+        set({ currentUser: userLogged, isAuthenticated: true })
+
+        return true
+      }
+
+      return false
+    } catch (error) {
+      console.error('Erro de conexão com o backend:', error)
+      return false
+    }
   },
 }))
