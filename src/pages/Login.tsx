@@ -11,21 +11,19 @@ const Login = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    setTimeout(() => {
-      const success = login(username, password)
+    const success = await login(username, password)
 
-      if (!success) {
-        setError('Usuário ou senha incorretos')
-      } else {
-        navigate('/')
-      }
-      setLoading(false)
-    }, 500)
+    if (!success) {
+      setError('Usuário ou senha incorretos')
+    } else {
+      navigate('/')
+    }
+    setLoading(false)
   }
 
   return (
