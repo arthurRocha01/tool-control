@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import AddProduct from './pages/AddProduct'
 import ProductEdit from './pages/EditProduct'
+import Products from './pages/Products'
 
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
@@ -19,6 +20,7 @@ function App() {
           element={isAuthenticated ? <MainLayout /> : <Navigate to='/login' replace />}
         >
           <Route index element={<Dashboard />} />
+          <Route path='products' element={<Products />} />
           <Route path='add-product' element={<AddProduct />} />
           <Route path='edit-product/:id' element={<ProductEdit />} />
         </Route>
