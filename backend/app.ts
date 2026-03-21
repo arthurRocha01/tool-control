@@ -12,8 +12,8 @@ app.use(cors())
 
 const apiRouter = express.Router()
 
-app.use('/produtos', productRoutes)
-app.use('/auth', authRoutes)
+apiRouter.use('/produtos', productRoutes)
+apiRouter.use('/auth', authRoutes)
 
 app.use('/api', apiRouter)
 

@@ -1,4 +1,4 @@
 // index para o Vercel
-import server from '../backend/app.js'
+import app from '../backend/app.js'
 
-export default server
+export default app
