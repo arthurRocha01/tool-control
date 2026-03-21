@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { LoginUseCase } from '../../application/login.use-case.js'
-import { UserMysqlRepository } from '../repositories/user.mysql.repository'
+import { UserMysqlRepository } from '../repositories/user.mysql.repository.js'
 
 const router = Router()
 
