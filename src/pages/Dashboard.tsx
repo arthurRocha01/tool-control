@@ -12,7 +12,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('http://localhost:5000/produtos')
+        const res = await fetch('/api/produtos')
         if (!res.ok) throw new Error('Erro ao buscar produtos')
         const data: Product[] = await res.json()
         setProducts(data)

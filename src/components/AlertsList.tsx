@@ -1,4 +1,4 @@
-import { StockAlert } from '../types'
+import type { StockAlert } from '../types'
 
 interface AlertsListProps {
   alerts: StockAlert[]

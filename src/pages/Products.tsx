@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useProductsStore } from '../store/productsStore'
-import { Product } from '../types'
+import type { Product } from '../types'
 
 const Products = () => {
   const navigate = useNavigate()

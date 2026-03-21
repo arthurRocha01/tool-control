@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { User } from '../types'
+import { type User } from '../types'
 import { mockUsers, getStoredUser, saveUser } from './mockData'
 
 interface AuthStore {
@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   loginAPI: async (username: string, password: string): Promise<boolean> => {
-    return fetch('http://localhost:5000/auth/login', {
+    return fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),

@@ -1,4 +1,4 @@
-import { Product, Settings, User } from '../types'
+import type { Product, Settings, User } from '../types'
 
 // Mock users continuam os mesmos (ou você pode implementar login via API também)
 export const mockUsers: User[] = [
@@ -18,7 +18,7 @@ export const mockSettings: Settings = {
 // ====== API PRODUCTS ======
 export const getProductsFromAPI = async (): Promise<Product[]> => {
   try {
-    const response = await fetch('http://localhost:5000/produtos')
+    const response = await fetch('/api/produtos')
     if (!response.ok) throw new Error('Erro ao buscar produtos da API')
     const data = await response.json()
     return data
@@ -34,7 +34,7 @@ export const saveProducts = (products: Product[]) => {
 }
 
 export const saveProduct = (product: Product) => {
-  fetch('http://localhost:5000/produtos', {
+  fetch('/api/produtos', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

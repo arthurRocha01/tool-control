@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Product } from '../types'
+import type { Product } from '../types'
 import { getProductsFromAPI, saveProduct, saveProducts } from './mockData'
 
 interface ProductsStore {
@@ -43,7 +43,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
   },
 
   deleteProduct: (id) => {
-    fetch(`http://localhost:5000/produtos/${id}`, { method: 'DELETE' }).catch(() => {
+    fetch(`/api/produtos/${id}`, { method: 'DELETE' }).catch(() => {
       alert('Erro ao excluir produto.')
     })
 

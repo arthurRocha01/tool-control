@@ -1,59 +1,60 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { initialFormData, ProductFormData, Product } from '../types'
+import { useProductsStore } from '../store/productsStore'
+import type { ProductFormData } from '../types'
 
-const ProductEdit = () => {
-  const { id } = useParams()
+const AddProduct = () => {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const { addProduct, updateProduct, getProductById } = useProductsStore()
 
-  const [formData, setFormData] = useState<ProductFormData>(initialFormData)
-  const [loading, setLoading] = useState(true)
+  const isEditMode = !!id
 
-  // ---------------------------
-  //  CARREGAR PRODUTO EXISTENTE
-  // ---------------------------
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: '',
+    brand: '',
+    model: '',
+    price: '',
+    quantity: '0',
+    minimum_quantity: '0',
+    description: {
+      material_type: '',
+      size: '',
+      voltage: '',
+    },
+  })
+
   useEffect(() => {
-    if (!id) return
-    ;(async () => {
-      try {
-        const res = await fetch(`http://localhost:5000/produtos/${id}`)
-        const data: Product = await res.json()
-        const { name, brand, model, price, quantity, minimum_quantity, description } = data
-        setFormData({
-          name,
-          brand,
-          model,
-          price,
-          quantity,
-          minimum_quantity,
-          description: { ...description },
-        })
-      } catch (err) {
-        console.error('Erro ao carregar produto', err)
-      } finally {
-        setLoading(false)
+    if (isEditMode && id) {
+      const product = getProductById(id)
+      if (product) {
+        setTimeout(() => {
+          setFormData({
+            name: product.name,
+            brand: product.brand,
+            model: product.model,
+            price: product.price,
+            quantity: product.quantity,
+            minimum_quantity: product.minimum_quantity,
+            description: product.description,
+          })
+        }, 0)
       }
-    })()
-  }, [id])
-
-  // ---------------------------
-  // FUNÇÃO DE UPDATE
-  // ---------------------------
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!id) return
-
-    try {
-      await fetch(`http://localhost:5000/produtos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      alert('Produto atualizado com sucesso!')
-      navigate('/products')
-    } catch (err) {
-      console.error('Erro ao editar produto', err)
     }
+  }, [isEditMode, id, getProductById])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (isEditMode && id) {
+      updateProduct(id, formData)
+      alert('Produto atualizado com sucesso!')
+    } else {
+      addProduct(formData)
+      alert('Produto cadastrado com sucesso!')
+    }
+
+    navigate('/products')
   }
 
   const handleInputChange = (field: keyof ProductFormData, value: string | number) => {
@@ -63,17 +64,22 @@ const ProductEdit = () => {
   const handleDescriptionChange = (field: keyof ProductFormData['description'], value: string) => {
     setFormData((prev) => ({
       ...prev,
-      description: { ...prev.description, [field]: value },
+      description: {
+        ...prev.description,
+        [field]: value,
+      },
     }))
   }
-
-  if (loading) return <p>Carregando...</p>
 
   return (
     <div className='p-8'>
       <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-900 mb-2'>Editar Produto</h1>
-        <p className='text-gray-600'>Atualize as informações do produto</p>
+        <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+          {isEditMode ? 'Editar Produto' : 'Cadastrar Produto'}
+        </h1>
+        <p className='text-gray-600'>
+          {isEditMode ? 'Atualize as informações do produto' : 'Adicione um novo item ao estoque'}
+        </p>
       </div>
 
       <div className='bg-white rounded-xl p-8 border border-gray-200 max-w-4xl'>
@@ -232,7 +238,7 @@ const ProductEdit = () => {
               className='flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium'
             >
               <i className='hgi-stroke hgi-checkmark-circle-01'></i>
-              Atualizar Produto
+              {isEditMode ? 'Atualizar Produto' : 'Salvar Produto'}
             </button>
             <button
               type='button'
@@ -249,4 +255,4 @@ const ProductEdit = () => {
   )
 }
 
-export default ProductEdit
+export default AddProduct
