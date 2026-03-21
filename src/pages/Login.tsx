@@ -16,14 +16,25 @@ const Login = () => {
     setError('')
     setLoading(true)
 
-    const success = await login(username, password)
+    console.log('1. Botão clicado! Chamando a API para o usuário:', username)
 
-    if (!success) {
-      setError('Usuário ou senha incorretos')
-    } else {
-      navigate('/')
+    try {
+      const success = await login(username, password)
+
+      console.log('2. A API respondeu! Sucesso?', success)
+
+      if (!success) {
+        setError('Usuário ou senha incorretos')
+      } else {
+        console.log('3. Indo para o Dashboard...')
+        navigate('/')
+      }
+    } catch (err) {
+      console.error('Erro fatal durante o login:', err)
+      setError('Erro no sistema ao tentar logar.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
