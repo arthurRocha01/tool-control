@@ -3,18 +3,18 @@ import { pool } from '../../../../core/database/connection.js'
 import type { ProductRepository } from '../../domain/product.repository.js'
 
 export interface ProdutoRow {
-  id: number;
-  name: string;
-  brand: string;
-  model: string;
-  price: number;
-  quantity: number;
-  minimum_quantity: number;
-  material_type: string;
-  size: string;
-  voltage: string;
-  created_at: Date;
-  updated_at: Date;
+  id: number
+  name: string
+  brand: string
+  model: string
+  price: number
+  quantity: number
+  minimum_quantity: number
+  material_type: string
+  size: string
+  voltage: string
+  created_at: Date
+  updated_at: Date
 }
 
 export class ProductMysqlRepository implements ProductRepository {
@@ -44,7 +44,9 @@ export class ProductMysqlRepository implements ProductRepository {
   }
 
   async findById(id: string): Promise<Product | null> {
-    const { rows } = await pool.query<ProdutoRow>(`SELECT * FROM products WHERE id = $1 LIMIT 1`, [id])
+    const { rows } = await pool.query<ProdutoRow>(`SELECT * FROM products WHERE id = $1 LIMIT 1`, [
+      id,
+    ])
     if (!rows[0]) return null
     return this.mapRowToProduct(rows[0])
   }

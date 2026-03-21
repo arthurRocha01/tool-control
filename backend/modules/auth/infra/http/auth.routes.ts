@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { LoginUseCase } from '../../application/login.use-case'
+import { LoginUseCase } from '../../application/login.use-case.js'
 import { UserMysqlRepository } from '../repositories/user.mysql.repository'
 
 const router = Router()

@@ -1,12 +1,12 @@
 import { pool } from '../../../../core/database/connection'
-import { User } from '../../domain/user.entity'
-import type { UserRepository } from '../../domain/user.repository'
+import { User } from '../../domain/user.entity.js'
+import type { UserRepository } from '../../domain/user.repository.js'
 
 interface UserRow {
-  id: string;
-  name: string;
-  username: string;
-  password: string;
+  id: string
+  name: string
+  username: string
+  password: string
 }
 
 export class UserMysqlRepository implements UserRepository {

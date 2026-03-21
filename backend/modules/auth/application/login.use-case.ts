@@ -1,4 +1,4 @@
-import type { UserRepository } from '../domain/user.repository'
+import type { UserRepository } from '../domain/user.repository.js'
 
 export class LoginUseCase {
   constructor(private userRepo: UserRepository) {}
