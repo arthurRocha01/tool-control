@@ -21,8 +21,6 @@ const Login = () => {
     try {
       const success = await login(username, password)
 
-      console.log('2. A API respondeu! Sucesso?', success)
-
       if (!success) {
         setError('Usuário ou senha incorretos')
       } else {
