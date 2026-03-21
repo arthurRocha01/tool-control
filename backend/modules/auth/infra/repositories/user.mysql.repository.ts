@@ -1,4 +1,4 @@
-import { pool } from '../../../../core/database/connection'
+import { pool } from '../../../../core/database/connection.js'
 import { User } from '../../domain/user.entity.js'
 import type { UserRepository } from '../../domain/user.repository.js'
 
